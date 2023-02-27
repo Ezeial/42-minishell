@@ -1,9 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_executable.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 08:59:56 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 12:17:57 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 int	ft_do_execve(t_command *cmd, t_data *data)
 {
 	char	**paths;
 	char	*cmd_path;
+	char	*tmp;
 
 	paths = ft_split(ft_getenv("PATH", data->envp), ':');
 	if (!paths)
@@ -13,17 +26,16 @@ int	ft_do_execve(t_command *cmd, t_data *data)
 	if (!cmd_path)
 		return (ft_print_error(cmd, ERR_CMD_NOT, NULL));
 	if (cmd->fd->in == RETURN_ERROR)
-	{
-		free(cmd_path);
-		return (1);
-	}
-	ft_change_envp(data, ft_realloc("_=", cmd_path, 0, 0));
+		return (ft_free_and_ret(cmd_path));
+	tmp = ft_realloc("_=", cmd_path, 0, 0);
+	ft_change_envp(data, tmp);
+	ft_sfree(tmp);
 	cmd->pid = fork();
 	if (cmd->pid < 0)
 		return (ft_print_error(cmd, errno, NULL));
 	if (cmd->pid == 0)
 		ft_child_process(cmd, data, cmd_path);
-	free((void *) cmd_path);
+	ft_sfree((void *) cmd_path);
 	return (0);
 }
 
@@ -32,22 +44,22 @@ void	ft_child_process(t_command *cmd, t_data *data, char *cmd_path)
 	char	**envp;
 	char	**argv;
 
+	data->errnum = 0;
 	ft_set_child_active();
 	ft_connect_pipe(cmd);
 	ft_close_child_fd(cmd, data);
 	envp = ft_create_envp_array(data->envp);
 	argv = ft_create_argv_array(cmd);
-	if (execve(cmd_path, argv, envp) == RETURN_ERROR)
-		ft_print_error(cmd, errno, NULL);
+	if (access(cmd_path, F_OK | X_OK | R_OK) != RETURN_SUCCESS)
+	{
+		printf("minishell: %s: Permission denied\n", cmd_path);
+		data->errnum = 126;
+	}
+	execve(cmd_path, argv, envp);
 	ft_close_pipe(cmd);
-	ft_free_char_array(envp);
-	ft_free_char_array(argv);
-	ft_delete_list(&data->envp);
 	ft_delete_list(&cmd->argv);
-	ft_delete_cmd(&data->c_line);
-	free((void *) data->pwd);
-	free((void *) cmd_path);
-	exit(0);
+	ft_clear_child_data(data, envp, argv, cmd_path);
+	exit(data->errnum);
 }
 
 char	**ft_create_argv_array(t_command *cmd)
@@ -56,7 +68,7 @@ char	**ft_create_argv_array(t_command *cmd)
 	t_envp	*tmp;
 	int		i;
 
-	output = (char **) malloc((ft_count_of_envp
+	output = (char **) ft_malloc((ft_count_of_envp
 				(cmd->argv) + 2) * sizeof(char *));
 	if (!output)
 		return (NULL);
@@ -79,7 +91,7 @@ char	**ft_create_envp_array(t_envp *envp)
 	t_envp	*tmp;
 	int		i;
 
-	output = (char **) malloc((ft_count_of_envp(envp) + 1) * sizeof(char *));
+	output = (char **) ft_malloc((ft_count_of_envp(envp) + 1) * sizeof(char *));
 	if (!output)
 		return (NULL);
 	tmp = envp;
@@ -110,8 +122,10 @@ char	*ft_check_path(char *cmd, char **paths)
 		test_path = ft_realloc(paths[i], "/", 0, 0);
 		test_path = ft_realloc(test_path, cmd, 1, 0);
 		if (access(test_path, F_OK) == RETURN_SUCCESS)
+		{
 			return (test_path);
-		free((void *) test_path);
+		}
+		ft_sfree((void *) test_path);
 		i++;
 	}
 	return (NULL);

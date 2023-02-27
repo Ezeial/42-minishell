@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_wildcard0.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 09:07:36 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 int	ft_wildcard(t_command *cmd, char *input)
@@ -82,7 +94,7 @@ char	**ft_get_filter(char *filter)
 	}
 	i--;
 	output[i] = ft_remove_char(output[i], '#');
-	free((void *) filter);
+	ft_sfree((void *) filter);
 	return (output);
 }
 
@@ -104,6 +116,6 @@ t_envp	*ft_get_files(char *path)
 		content = readdir(dir);
 	}
 	closedir(dir);
-	free((void *) path);
+	ft_sfree((void *) path);
 	return (list);
 }

@@ -1,30 +1,61 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_minishell.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 08:58:57 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 14:07:43 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../minishell.h"
 
-int	main(int argc, char **argv, char **envp)
-{
-	t_data		data;
+t_data	*g_data;
 
-	ft_initialize(&data, envp);
-	ft_set_parent_interactive();
-	(void) argc;
-	(void) argv;
-	while (1)
+static int	ft_set_pwd(t_data *data)
+{
+	char	*output;
+
+	output = (char *) ft_malloc(BUFFER_SIZE);
+	if (!output)
+		return (1);
+	getcwd(output, BUFFER_SIZE);
+	output = ft_realloc("PWD=", output, 0, 1);
+	if (!output)
+		return (1);
+	data->pwd = output;
+	if (ft_change_envp(data, output))
+		return (1);
+	return (0);
+}
+
+static int	ft_initialize(t_data *data, char **envp)
+{
+	t_envp	*tmp_envp;
+
+	data->gclst = 0;
+	data->c_line = NULL;
+	data->r_line = NULL;
+	data->errnum = 0;
+	data->envp = 0;
+	if (envp && *envp)
+		data->envp = ft_copy_envp(envp);
+	tmp_envp = ft_get_envp_element(data->envp, "PATH");
+	if (!tmp_envp)
+		ft_change_envp(data, DEFAULT_PATH);
+	tmp_envp = ft_get_envp_element(data->envp, "PWD");
+	ft_init_shell_level(data);
+	if (!tmp_envp)
+		ft_set_pwd(data);
+	else
 	{
-		data.r_line = readline(PROMPT);
-		if (data.r_line == NULL)
-			break ;
-		if (ft_strlen(data.r_line) > 0)
-			add_history(data.r_line);
-		ft_parser(&data);
-		if (ft_do_valid_redirections(&data) == RETURN_SUCCESS)
-			if (ft_cycle_cmd(&data) == RETURN_EXIT)
-				break ;
-		ft_wait_for_kids(&data);
-		free((void *) data.r_line);
-		ft_delete_cmd(&data.c_line);
+		data->pwd = ft_string_dup(tmp_envp->var);
+		if (!(data->pwd))
+			return (1);
 	}
-	ft_clear_mem(&data);
-	return (data.errnum);
+	return (ft_change_envp(data, "SHELL=EZIO & MARC MINISHELL!"));
 }
 
 void	ft_clear_mem(t_data *data)
@@ -39,89 +70,31 @@ void	ft_clear_mem(t_data *data)
 		ft_delete_cmd(&data->c_line);
 	}
 	rl_clear_history();
-	free((void *) data->pwd);
+	ft_sfree((void *) data->pwd);
 	if (data->r_line)
-		free((void *) data->r_line);
+		ft_sfree((void *) data->r_line);
 	else
 		ft_write_fd(STDOUT_FILENO, "exit\n");
+	ft_plst_free(&(data->gclst));
 }
 
-void	ft_wait_for_kids(t_data *data)
+int	main(int argc, char **argv, char **envp)
 {
-	t_command	*tmp;
-	int			status;
+	t_data		data;
 
-	if (!data->c_line)
-		return ;
-	tmp = data->c_line;
-	status = 0;
-	while (tmp)
+	(void) argc;
+	(void) argv;
+	g_data = &data;
+	if (!ft_initialize(&data, envp))
 	{
-		if (tmp->pid != 0 && waitpid(tmp->pid, &status, 0) != RETURN_ERROR)
-		{
-			if (WIFEXITED(status))
-				tmp->errnum = WEXITSTATUS(status);
-			else if (WIFSIGNALED(status))
-				tmp->errnum = 128 + WTERMSIG(status);
-		}
-		tmp = tmp->next;
-	}
-	tmp = ft_last_cmd(data->c_line);
-	data->errnum = tmp->errnum;
-	ft_set_parent_interactive();
-}
-
-void	ft_initialize(t_data *data, char **envp)
-{
-	char	*output;
-	t_envp	*tmp_envp;
-
-	data->c_line = NULL;
-	data->r_line = NULL;
-	data->errnum = 0;
-	data->envp = ft_copy_envp(envp);
-	tmp_envp = ft_get_envp_element(data->envp, "PATH");
-	if (!tmp_envp)
-		ft_change_envp(data, DEFAULT_PATH);
-	tmp_envp = ft_get_envp_element(data->envp, "PWD");
-	if (!tmp_envp)
-	{
-		output = (char *) malloc(BUFFER_SIZE);
-		if (!output)
-			return ;
-		getcwd(output, BUFFER_SIZE);
-		output = ft_realloc("PWD=", output, 0, 1);
-		ft_change_envp(data, output);
-		data->pwd = output;
+		ft_set_parent_interactive();
+		ft_read_loop(&data);
 	}
 	else
-		data->pwd = ft_string_dup(tmp_envp->var);
-	ft_change_envp(data, "SHELL=EZIO & MARC MINISHELL!");
-}
-
-int	ft_cycle_cmd(t_data *data)
-{
-	t_command	*cmd;
-	int			result;
-
-	ft_set_parent_active();
-	cmd = data->c_line;
-	while (cmd)
 	{
-		if (cmd->result == RETURN_SUCCESS && cmd->cmd)
-		{
-			if (cmd->next)
-				ft_create_pipe(cmd);
-			result = ft_build_in_exe(cmd, data);
-			if (result == RETURN_EXIT)
-				return (RETURN_EXIT);
-			if (result == RETURN_FALSE)
-				ft_do_execve(cmd, data);
-		}
-		else if (cmd->result == RETURN_SUCCESS && !cmd->cmd)
-			return (ft_print_error(cmd, ERR_SYNTAX, ""));
-		ft_close_pipe(cmd);
-		cmd = cmd->next;
+		ft_write_fd(STDERR_FILENO, "Allocation error.\n");
+		data.errnum = 1;
 	}
-	return (RETURN_SUCCESS);
+	ft_clear_mem(&data);
+	return (data.errnum);
 }

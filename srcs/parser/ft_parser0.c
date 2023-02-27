@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_parser0.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 08:59:35 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
-void	ft_parser(t_data *data)
+int	ft_parser(t_data *data)
 {
 	t_parser	parser;
 
@@ -12,8 +24,10 @@ void	ft_parser(t_data *data)
 		parser.result = ft_check_cmd(data, &parser);
 		if (parser.result == RETURN_ERROR)
 			break ;
-		if (parser.result == RETURN_TRUE)
-			ft_get_re(data, &parser);
+		if (parser.result == RETURN_TRUE && ft_get_re(data, &parser))
+		{
+			return (1);
+		}
 		if (parser.result == RETURN_FALSE)
 			ft_parser_add_argv(data, &parser);
 		ft_free((void *) parser.token);
@@ -24,6 +38,7 @@ void	ft_parser(t_data *data)
 		if (ft_strcmp(parser.cmd->cmd, "echo"))
 			parser.inside_echo = 1;
 	}
+	return (0);
 }
 
 void	ft_init_parser(t_parser *parser, t_data *data)

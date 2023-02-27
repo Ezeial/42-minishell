@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_parser5.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 08:59:47 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 void	ft_parser_add_argv(t_data *data, t_parser *parser)
@@ -15,5 +27,5 @@ void	ft_parser_add_argv(t_data *data, t_parser *parser)
 			parser->cmd->result = RETURN_SUCCESS;
 		}
 	}
-	free((void *) tmp);
+	ft_sfree((void *) tmp);
 }

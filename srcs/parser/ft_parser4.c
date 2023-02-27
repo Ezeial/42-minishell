@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_parser4.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 08:59:45 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 char	*ft_found_hash(char *input)
@@ -12,7 +24,7 @@ void	ft_add_string(t_parse *check, char *input)
 
 	tmp = ft_get_substring(input, check->start, check->i - check->start);
 	ft_lstadd_back(&check->str, ft_lstnew(tmp));
-	free((void *) tmp);
+	ft_sfree((void *) tmp);
 	check->i_string++;
 }
 
@@ -34,7 +46,7 @@ char	*ft_check_dollar_in_heredoc(char *token, t_data *data)
 		return (token);
 	if (check.start != check.i)
 		ft_lstadd_back(&check.str, ft_lstnew(&token[check.start]));
-	free(token);
+	ft_sfree(token);
 	return (ft_prepare_output(check.str));
 }
 
@@ -44,7 +56,7 @@ void	ft_questionmark(t_parse *check, t_data *data)
 
 	tmp2 = ft_int_to_string((long) data->errnum);
 	ft_lstadd_back(&check->str, ft_lstnew(tmp2));
-	free((void *) tmp2);
+	ft_sfree((void *) tmp2);
 }
 
 t_return	ft_check_for_asterisk(t_parser *parser, char *input)

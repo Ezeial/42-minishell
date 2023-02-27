@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_utils2.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 08:59:16 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 int	ft_pos_in_string(char *s, char c)
@@ -21,7 +33,7 @@ char	*ft_remove_char(char *s, char c)
 	if (count == 0)
 		return (s);
 	tmp = s;
-	output = (char *) malloc((ft_strlen(s) - count) + 1);
+	output = (char *) ft_malloc((ft_strlen(s) - count) + 1);
 	if (!output)
 		return (NULL);
 	i = 0;
@@ -35,7 +47,7 @@ char	*ft_remove_char(char *s, char c)
 		s++;
 	}
 	output[i] = '\0';
-	free((void *) tmp);
+	ft_sfree((void *) tmp);
 	return (output);
 }
 
@@ -76,6 +88,6 @@ int	ft_strncmp(const char *s1, const char *s2, size_t n)
 void	ft_free(void *ptr)
 {
 	if (ptr)
-		free((void *) ptr);
+		ft_sfree((void *) ptr);
 	ptr = NULL;
 }

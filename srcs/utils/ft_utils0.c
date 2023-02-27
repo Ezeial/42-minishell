@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_utils0.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 08:59:11 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 size_t	ft_strlen(const char *s)
@@ -61,7 +73,7 @@ char	*ft_string_dup(const char *s)
 {
 	char	*output;
 
-	output = (char *) malloc(ft_strlen(s) + 1);
+	output = (char *) ft_malloc(ft_strlen(s) + 1);
 	if (!output)
 		return (NULL);
 	ft_copy(output, (char *)s, 0);
@@ -74,7 +86,7 @@ char	*ft_get_substring(char const *s, size_t start, size_t len)
 
 	if (!s)
 		return (NULL);
-	substring = (char *) malloc(len + 1);
+	substring = (char *) ft_malloc(len + 1);
 	if (!substring)
 		return (NULL);
 	ft_copy(substring, (char *) &s[start], len + 1);

@@ -1,14 +1,26 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_commands0.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 08:59:51 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 t_command	*ft_create_cmd_elem(void)
 {
 	t_command	*output;
 
-	output = (t_command *) malloc(sizeof(t_command));
+	output = (t_command *) ft_malloc(sizeof(t_command));
 	if (!output)
 		return (NULL);
 	ft_memset((void *) output, 0, sizeof(t_command));
-	output->fd = (t_fd *) malloc(sizeof(t_fd));
+	output->fd = (t_fd *) ft_malloc(sizeof(t_fd));
 	if (!output->fd)
 		return (NULL);
 	output->fd->in = STDIN_FILENO;
@@ -27,13 +39,13 @@ void	ft_delete_cmd(t_command **commands)
 	{
 		tmp = *commands;
 		*commands = (*commands)->next;
-		free((void *) tmp->cmd);
-		free((void *) tmp->fd);
+		ft_sfree((void *) tmp->cmd);
+		ft_sfree((void *) tmp->fd);
 		tmp->fd = NULL;
 		tmp->cmd = NULL;
 		ft_delete_list(&tmp->argv);
 		ft_lstdel_re(&tmp->re);
-		free((void *) tmp);
+		ft_sfree((void *) tmp);
 		tmp = NULL;
 	}
 }

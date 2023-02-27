@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_error0.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 09:06:55 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 int	ft_print_error(t_command *cmd, int errnum, char *token)
@@ -38,7 +50,7 @@ int	ft_error_codes(t_command *cmd)
 		ft_write_fd(cmd->fd->out, tmp);
 		ft_write_fd_nl(cmd->fd->out, strerror(i));
 		i++;
-		free((void *) tmp);
+		ft_sfree((void *) tmp);
 	}
 	return (RETURN_SUCCESS);
 }

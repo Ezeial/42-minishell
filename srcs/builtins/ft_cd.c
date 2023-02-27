@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_cd.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 09:07:04 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 12:23:27 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 static void	ft_absolute_path(t_data *data, t_command *cmd);
@@ -11,7 +23,9 @@ int	ft_cd(t_data *data, t_command *cmd)
 	struct stat	path_check;
 
 	if (!cmd->argv)
-		return (RETURN_ERROR);
+		cmd->argv = ft_lstnew(ft_getenv("HOME", data->envp));
+	if (cmd->argv->next)
+		return (ft_cd_error_argc(cmd));
 	if (lstat(cmd->argv->var, &path_check) == RETURN_ERROR)
 		return (ft_print_error(cmd, ERR_CD_FOLDER, cmd->argv->var));
 	cmd->errnum = 0;
@@ -20,7 +34,7 @@ int	ft_cd(t_data *data, t_command *cmd)
 		chdir(cmd->argv->var);
 		old_pwd = ft_realloc("OLDPWD=", ft_getenv("PWD", data->envp), 0, 0);
 		ft_change_envp(data, old_pwd);
-		free(old_pwd);
+		ft_sfree(old_pwd);
 		if (cmd->argv->var[0] == '/')
 			ft_absolute_path(data, cmd);
 		else
@@ -34,7 +48,7 @@ static void	ft_absolute_path(t_data *data, t_command *cmd)
 {
 	int	len;
 
-	free(data->pwd);
+	ft_sfree(data->pwd);
 	data->pwd = ft_realloc("PWD=", cmd->argv->var, 0, 0);
 	len = ft_strlen(data->pwd) - 1;
 	if (data->pwd[len] == '/')
@@ -91,6 +105,6 @@ static char	*ft_cd_remove_folder(char *path)
 		output = ft_string_dup("PWD=/");
 	else
 		output = ft_get_substring(path, 0, len);
-	free(path);
+	ft_sfree(path);
 	return (output);
 }

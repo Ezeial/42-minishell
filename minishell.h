@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 09:07:46 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 13:04:22 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef MINISHELL_H
 # define MINISHELL_H
 # include <unistd.h>
@@ -72,6 +84,11 @@ typedef struct s_envp {
 	struct s_envp		*next;
 }				t_envp;
 
+typedef struct s_plst {
+	void				*data;
+	struct s_plst		*next;
+}				t_plst;
+
 typedef struct s_data {
 	struct s_envp		*envp;
 	struct s_command	*c_line;
@@ -80,6 +97,7 @@ typedef struct s_data {
 	char				*pwd;
 	struct sigaction	response;
 	struct sigaction	child;
+	t_plst				*gclst;
 }				t_data;
 
 typedef struct s_parse {
@@ -98,6 +116,18 @@ typedef struct s_parser {
 	int					result;
 }				t_parser;
 
+extern t_data	*g_data;
+
+void			ft_parent_sigterm(int sign);
+
+//ft_minishell.c
+void			ft_clear_mem(t_data *data);
+
+//ft_read_loop.c
+int				ft_read_loop(t_data *data);
+int				ft_cycle_cmd(t_data *data);
+void			ft_wait_for_kids(t_data *data);
+
 //ft_signals.c
 void			ft_set_parent_interactive(void);
 void			ft_set_parent_active(void);
@@ -109,12 +139,6 @@ void			ft_parent_interactive_sigint(int sign);
 void			ft_parent_active_sigint(int sign);
 void			ft_parent_active_sigquit(int sign);
 void			ft_bash_sigint(int sign);
-
-//ft_minishell.c
-int				ft_cycle_cmd(t_data *data);
-void			ft_initialize(t_data *data, char **envp);
-void			ft_wait_for_kids(t_data *data);
-void			ft_clear_mem(t_data *data);
 
 //ft_error0.c
 int				ft_print_error(t_command *cmd, int errnum, char *filename);
@@ -132,6 +156,7 @@ void			ft_err_cd_folder(t_command *cmd, char *token);
 void			ft_err_else(t_command *cmd, int errnum);
 void			ft_err_fd(t_command *cmd, char *token);
 void			ft_err_file(t_command *cmd);
+void			ft_err_cd_tooarg(t_command *cmd);
 
 //ft_utils0.c
 size_t			ft_strlen(const char *s);
@@ -169,11 +194,18 @@ char			*ft_strnstr(const char *big, const char *little, size_t len);
 
 //ft_utils5.c
 size_t			ft_replace_in_string(char *s, char c_replace, char c_with);
+void			ft_clear_child_data(t_data *data, char **envp, \
+					char **argv, char *cmd_path);
+int				ft_free_and_ret(char *cmd_path);
+t_return		ft_cd_error_argc(t_command *cmd);
+
+//ft_utils6.c
+void			ft_init_shell_level(t_data *data);
 
 //ft_parser0.c
 void			ft_init_parser(t_parser *parser, t_data *data);
 int				ft_check_heredoc_end_term(char *s);
-void			ft_parser(t_data *data);
+int				ft_parser(t_data *data);
 int				ft_end_of_token(char *s, int *inside_echo);
 int				ft_find_end_of_token(char *s, int *inside_echo);
 
@@ -218,7 +250,7 @@ int				ft_is_number_only(char *input);
 t_envp			*ft_copy_envp(char **envp);
 t_envp			*ft_lstnew(char *content);
 t_envp			*ft_lstlast(t_envp *lst);
-void			ft_lstadd_back(t_envp **lst, t_envp *new);
+t_envp			*ft_lstadd_back(t_envp **lst, t_envp *new);
 void			ft_delete_list(t_envp **lst);
 
 //ft_env1.c
@@ -252,7 +284,7 @@ void			ft_add_quotes(t_envp *envp);
 //ft_export1.c
 void			ft_sort_list(t_envp **envp);
 void			ft_swap(t_envp **first, t_envp *swap_a);
-void			ft_change_envp(t_data *data, char *var);
+int				ft_change_envp(t_data *data, char *var);
 
 //ft_unset.c
 int				ft_unset(t_data *data, t_command *cmd);
@@ -298,10 +330,13 @@ t_re			*ft_lstnew_re(char *direct, char *file);
 t_re			*ft_lstlast_re(t_re *lst);
 void			ft_lstadd_back_re(t_re **lst, t_re *new);
 void			ft_lstdel_re(t_re **re);
-void			ft_get_re(t_data *data, t_parser *parser);
+int				ft_get_re(t_data *data, t_parser *parser);
 
 //ft_redirect2.c
 void			ft_do_redirections(t_command *cmd, t_re *re);
+t_return		ft_error_heredoc_b(char *tmp, int fd_out, \
+					unsigned int line, char *end_term);
+t_return		ft_error_heredoc_a(char *tmp, int fd_out);
 
 //ft_get_next_line.c
 char			*ft_get_next_line(int fd);
@@ -317,5 +352,17 @@ t_return		ft_check_element(t_envp *full_list, char **filter,
 //ft_wildcard1.c
 t_envp			*ft_prepare_list(char *input);
 void			ft_get_filter_path(char *input, char **path, char **filter);
+
+//ft_gcc
+t_plst			*ft_plst_new(void *data);
+void			ft_plst_add(t_plst **l, t_plst *i);
+void			ft_plst_del_one(t_plst **l, void *d);
+void			ft_plst_free(t_plst **l);
+t_plst			*ft_plst_find(t_plst *l, void *d);
+void			ft_super_exit(void);
+void			*ft_malloc(size_t size);
+void			ft_sfree(void *ptr);
+void			ft_free_all(void);
+void			ft_handle_first(t_plst **l);
 
 #endif

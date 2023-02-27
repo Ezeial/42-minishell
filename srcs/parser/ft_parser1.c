@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_parser1.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 08:59:38 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 void	ft_inside_d_quote(t_parse *check, char *input, t_data *data)
@@ -5,6 +17,8 @@ void	ft_inside_d_quote(t_parse *check, char *input, t_data *data)
 	if (check->i > 0)
 		ft_add_string(check, input);
 	check->start = check->i + 1;
+	if (!input[check->i + 1])
+		return ;
 	check->i++;
 	while (input[check->i])
 	{
@@ -27,6 +41,8 @@ void	ft_inside_s_quote(t_parse *check, char *input)
 	if (check->i > 0)
 		ft_add_string(check, input);
 	check->start = check->i + 1;
+	if (!input[check->i + 1])
+		return ;
 	check->i++;
 	while (input[check->i])
 	{
@@ -64,7 +80,7 @@ void	ft_found_dollar(t_parse *check, char *input, t_data *data)
 	check->i_string++;
 	check->i += ft_strlen(tmp);
 	check->start = check->i + 1;
-	free((void *) tmp);
+	ft_sfree((void *) tmp);
 }
 
 char	*ft_prepare_output(t_envp *list)
@@ -73,7 +89,7 @@ char	*ft_prepare_output(t_envp *list)
 	t_envp	*tmp;
 
 	tmp = list;
-	output = (char *) malloc(1);
+	output = (char *) ft_malloc(1);
 	output[0] = '\0';
 	while (tmp)
 	{
@@ -93,7 +109,7 @@ char	*ft_get_next_token(t_parser *parser, t_data *data)
 	len = ft_end_of_token(parser->tmp, 0);
 	parser->token = ft_get_substring(parser->tmp, 0, len);
 	output = ft_check_quotes_insert_var(parser, data);
-	free(parser->token);
+	ft_sfree(parser->token);
 	parser->token = NULL;
 	parser->tmp += len;
 	return (output);

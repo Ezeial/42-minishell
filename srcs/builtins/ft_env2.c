@@ -1,30 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_commands1.c                                     :+:      :+:    :+:   */
+/*   ft_env2.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/02/27 08:59:53 by egiraldi          #+#    #+#             */
+/*   Created: 2023/02/27 09:07:13 by egiraldi          #+#    #+#             */
 /*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-int	ft_first_cmd(t_command *cmd, t_data *data)
+char	*ft_getenv(char *var, t_envp *envp_list)
 {
-	if (cmd != data->c_line)
-		return (0);
-	return (1);
-}
-
-t_command	*ft_last_cmd(t_command *cmd)
-{
-	t_command	*tmp;
-
-	tmp = cmd;
-	while (tmp->next)
-		tmp = tmp->next;
-	return (tmp);
+	while (!ft_str_var_cmp(var, envp_list->var))
+	{
+		envp_list = envp_list->next;
+		if (envp_list == NULL)
+			return (NULL);
+	}
+	return (&envp_list->var[ft_pos_in_string(envp_list->var, '=') + 1]);
 }

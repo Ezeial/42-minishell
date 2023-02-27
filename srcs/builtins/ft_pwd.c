@@ -1,30 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_commands1.c                                     :+:      :+:    :+:   */
+/*   ft_pwd.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/02/27 08:59:53 by egiraldi          #+#    #+#             */
+/*   Created: 2023/02/27 09:07:28 by egiraldi          #+#    #+#             */
 /*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../minishell.h"
 
-int	ft_first_cmd(t_command *cmd, t_data *data)
+int	ft_pwd(t_data *data, t_command *cmd)
 {
-	if (cmd != data->c_line)
-		return (0);
-	return (1);
-}
-
-t_command	*ft_last_cmd(t_command *cmd)
-{
-	t_command	*tmp;
-
-	tmp = cmd;
-	while (tmp->next)
-		tmp = tmp->next;
-	return (tmp);
+	ft_write_fd_nl(cmd->fd->out, &data->pwd[ft_pos_in_string
+		(data->pwd, '=') + 1]);
+	return (RETURN_SUCCESS);
 }

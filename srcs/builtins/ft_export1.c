@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_export1.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 09:07:25 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 09:10:27 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 void	ft_swap(t_envp **first, t_envp *swap_a)
@@ -35,14 +47,14 @@ void	ft_add_quotes(t_envp *envp)
 			len = 0;
 		if (len > 0)
 		{
-			new_value = (char *) malloc(ft_strlen(tmp->var) + 3);
+			new_value = (char *) ft_malloc(ft_strlen(tmp->var) + 3);
 			len++;
 			ft_copy(new_value, tmp->var, len + 1);
 			ft_copy(&new_value[len], "\"", 0);
 			ft_copy(&new_value[len + 1], &tmp->var[len], 0);
 			len = ft_strlen(new_value);
 			ft_copy(&new_value[len], "\"", 0);
-			free((void *) tmp->var);
+			ft_sfree((void *) tmp->var);
 			tmp->var = new_value;
 		}
 		tmp = tmp->next;

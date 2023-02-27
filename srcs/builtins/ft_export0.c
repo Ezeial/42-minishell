@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_export0.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: egiraldi <egiraldi@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/02/27 09:07:19 by egiraldi          #+#    #+#             */
+/*   Updated: 2023/02/27 13:18:23 by egiraldi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../../minishell.h"
 
 int	ft_export(t_data *data, t_command *cmd)
@@ -14,24 +26,27 @@ int	ft_export(t_data *data, t_command *cmd)
 			ft_print_error(cmd, ERR_NOT_VALID, tmp->var);
 		}
 		else if (cmd == data->c_line)
+		{
 			ft_change_envp(data, tmp->var);
+		}
 		tmp = tmp->next;
 	}
 	return (RETURN_SUCCESS);
 }
 
-void	ft_change_envp(t_data *data, char *var)
+int	ft_change_envp(t_data *data, char *var)
 {
 	t_envp	*tmp;
 
 	tmp = ft_get_envp_element(data->envp, var);
 	if (tmp)
 	{
-		free((void *) tmp->var);
+		ft_sfree((void *) tmp->var);
 		tmp->var = ft_string_dup(var);
 	}
 	else
 		ft_lstadd_back(&data->envp, ft_lstnew(var));
+	return (0);
 }
 
 int	ft_check_validity(char *argv)
